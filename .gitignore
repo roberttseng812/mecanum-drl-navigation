@@ -1,0 +1,12 @@
+build/
+install/
+log/
+__pycache__/
+*.py[cod]
+.venv/
+.env
+~$*
+/tmp/
+/runs*/
+/models*/
+/amr_nav2_experiments/
