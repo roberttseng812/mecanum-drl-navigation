@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Includes -->
+  <xacro:include filename="$(find auo_model)/urdf/base/base_amr150m.gazebo.xacro" />
+
+  <xacro:macro name="base" params="x y z">
+    <link name='base_footprint'>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint type="fixed" name="base_footprint_joint">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="base_footprint"/>
+      <child link="base_link"/>
+    </joint>
+
+    <link name="base_link">
+
+      <visual>
+        <origin xyz="${x} ${y} ${z}" rpy="0 0 0" />
+        <geometry>
+          <box size="1.0 0.6 0.25"/>
+        </geometry>
+      </visual>
+
+      <collision>
+        <origin xyz="${x} ${y} ${z}" rpy="0 0 0" />
+        <geometry>
+          <box size="1.0 0.6 0.25"/>
+        </geometry>
+      </collision>
+
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="15"/>
+        <inertia ixx="2.50000000" ixy="0" ixz="0" iyy="2.50000000" iyz="0" izz="2.50000000"/>
+      </inertial>
+    </link>
+
+    <!-- Base Gazebo Plugin -->
+    <xacro:gazebo_base />
+  </xacro:macro>
+</robot>

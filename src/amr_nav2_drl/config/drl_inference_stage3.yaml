@@ -1,0 +1,24 @@
+drl_inference_stage3:
+  ros__parameters:
+    algo: SAC
+    scan_topic: /scan
+    goal_topic: drl/local_goal
+    cmd_topic: drl/cmd_vel
+
+    # Stage3 training-aligned defaults
+    max_goal_dist: 6.0
+    goal_threshold: 0.30
+    yaw_threshold: 0.20
+
+    control_hz: 20.0
+    laser_downsample_n: 240
+    lidar_history_steps: 4
+    lidar_history_stride: 3
+
+    vx_min: -0.3
+    vx_max: 0.47
+    vy_abs_max: 0.35
+    wz_abs_max: 0.8
+
+    debug_log_enabled: true
+    debug_log_hz: 1.0

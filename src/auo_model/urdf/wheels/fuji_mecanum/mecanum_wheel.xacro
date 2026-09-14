@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<robot name="mecanum_wheel" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find auo_model)/urdf/wheels/fuji_mecanum/wheel.xacro" />
+  <xacro:include filename="$(find auo_model)/urdf/wheels/fuji_mecanum/rollers.xacro"  />
+
+  <xacro:macro name="mecanum_wheel" params="name x y z side interface:='hardware_interface/EffortJointInterface'">
+
+    <xacro:wheel_link name="${name}" side="${side}" />
+    <xacro:rollers_link name="${name}" side="${side}" />
+
+    <joint name="${name}_wheel_joint" type="continuous">
+      <origin xyz="${x} ${y} ${z}" rpy="0 0 ${pi/2}" />
+      <axis xyz="1 0 0" />
+      <parent link="base_link" />
+      <child link="${name}_wheel_link" />
+    </joint>
+
+    <transmission name="${name}_wheel_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${name}_wheel_joint">
+        </joint>
+      <actuator name="${name}_wheel_motor">
+        <mechanismReduction>1</mechanismReduction>
+      </actuator>
+    </transmission>
+
+  </xacro:macro>
+
+</robot>

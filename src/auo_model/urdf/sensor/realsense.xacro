@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
+
+  <xacro:macro name="realsense_camera" params="name parent x y z roll pitch yaw">
+    <xacro:sensor_d435
+      name="${name}"
+      parent="${parent}"
+      use_nominal_extrinsics="true">
+      <origin xyz="${x} ${y} ${z}" rpy="${roll} ${pitch} ${yaw}" />
+    </xacro:sensor_d435>
+  </xacro:macro>
+
+
+</robot>

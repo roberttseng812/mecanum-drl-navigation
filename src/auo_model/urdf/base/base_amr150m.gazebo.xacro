@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="gazebo_base" >
+    <gazebo reference="base_link">
+      <material>Gazebo/Blue</material>
+    </gazebo>
+    <gazebo>
+      <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+        <ros>
+          <namespace>/</namespace>
+          <remapping>odom:=odom</remapping>
+        </ros>
+        <body_name>base_footprint</body_name> 
+        <frame_name>odom</frame_name>
+        <update_rate>20.0</update_rate>
+        <xyz_offset>0 0 0</xyz_offset>
+        <rpy_offset>0 0 0</rpy_offset>
+        <gaussian_noise>0.00</gaussian_noise>
+        <publish_odom_tf>true</publish_odom_tf> 
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+</robot>

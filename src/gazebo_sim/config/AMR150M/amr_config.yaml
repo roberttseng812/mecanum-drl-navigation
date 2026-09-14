@@ -1,0 +1,33 @@
+# map_frame_id: map
+# odom_frame_id: odom
+# base_frame_id: base_link
+
+# motion_type: 0
+# amr_width: 0.600
+# amr_length: 1.100
+# amr_wheel_width: 0.530 # between wheels
+# amr_wheel_length: 0.650 # between wheels
+# wheel_diameter: 0.200
+# reduction_ratio: 30
+# encoder_pulse: 2500
+
+mecanum_controller:
+  ros__parameters:
+    amr_wheel_width: 0.530
+    amr_wheel_length: 0.650
+    wheel_diameter: 0.200
+
+    # --- odom tuning ---
+    use_jointstate_stamp: true
+    use_imu_yaw: true
+    vel_filter_alpha: 0.25
+    vy_deadband: 0.003
+    wz_deadband: 0.003
+
+    # --- slip mitigation (important for lateral) ---
+    lin_accel_limit: 1.0
+    ang_accel_limit: 1.0
+
+    # 如果你發現 odom 的 vy 方向是反的，再改這個（預設全 1）
+    wheel_feedback_signs: [1.0, 1.0, 1.0, 1.0]  # [FR, FL, RR, RL]
+

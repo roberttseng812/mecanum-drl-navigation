@@ -1,0 +1,8 @@
+<library path="amr_nav2_drl">
+  <class
+      name="amr_nav2_drl::DrlController"
+      type="amr_nav2_drl::DrlController"
+      base_class_type="nav2_core::Controller">
+    <description>DRL-based holonomic controller bridging to a Python inference node.</description>
+  </class>
+</library>

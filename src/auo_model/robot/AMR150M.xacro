@@ -1,0 +1,103 @@
+<?xml version='1.0'?>
+
+<!-- choose a name space and start xacro -->
+<robot name="AMR150M" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="gazebo_controllers" default=""/>
+  <!-- Start by including all required xacro files which hold the macros -->
+  <!-- <xacro:include filename="$(find auo_model)/urdf/controller_plugin/nexus_4wd_mecanum.xacro" /> -->
+  <xacro:include filename="$(find auo_model)/urdf/controller_plugin/gazebo_ros_control.xacro" />
+  <xacro:include filename="$(find auo_model)/urdf/wheels/fuji_mecanum/mecanum_wheel.xacro" />
+  <xacro:include filename="$(find auo_model)/urdf/base/base_amr150m.urdf.xacro" />
+  <!-- <xacro:include filename="$(find summit_description)/urdf/sensor/camera.xacro"/> -->
+  <xacro:include filename="$(find auo_model)/urdf/sensor/realsense.xacro" />
+  <xacro:include filename="$(find auo_model)/urdf/sensor/lidar.urdf.xacro" />
+  <xacro:include filename="$(find auo_model)/urdf/sensor/imu.xacro" />
+  <!-- Create a dummy link as base link -->
+  <xacro:base x="0" y="0" z="0.15" />
+  <!--wheel_front_left-->
+  <xacro:mecanum_wheel name="front_left" x="0.325" y="0.265" z="0.1" side="-1"/>
+  <!--wheel_front_right-->
+  <xacro:mecanum_wheel name="front_right" x="0.325" y="-0.265" z="0.1" side="1"/>
+  <!--wheel_rear_left-->
+  <xacro:mecanum_wheel name="rear_left" x="-0.325" y="0.265" z="0.1" side="1"/>
+  <!--wheel_rear_right-->
+  <xacro:mecanum_wheel name="rear_right" x="-0.325" y="-0.265" z="0.1" side="-1"/>
+
+  <xacro:realsense_camera name="camera_front" parent="base_link" x="0.49065" y="0" z="0.22943" roll="0" pitch="0" yaw="0"/>
+  <xacro:realsense_camera name="camera_right" parent="base_link" x="0" y="-0.28865" z="0.22943" roll="0" pitch="0" yaw="-1.57"/>
+  <xacro:realsense_camera name="camera_left" parent="base_link" x="0" y="0.28865" z="0.22943" roll="0" pitch="0" yaw="1.57"/>
+  <xacro:realsense_camera name="camera_back" parent="base_link" x="-0.49065" y="0" z="0.22943" roll="0" pitch="0" yaw="3.14"/>
+  <!--front_camera-->
+  <!-- <xacro:realsense_camera name="camera_front" x="0.49065" y="0" z="0.22943" yaw="0" point_cloud="true"/> -->
+  <!--right_camera-->
+  <!-- <xacro:realsense_camera name="camera_right" x="0" y="-0.28865" z="0.22943" yaw="-1.57" point_cloud="true"/> -->
+  <!--left_camera-->
+  <!-- <xacro:realsense_camera name="camera_left" x="0" y="0.28865" z="0.22943" yaw="1.57" point_cloud="true"/> -->
+  <!--back_camera-->
+  <!-- <xacro:realsense_camera name="camera_back" x="-0.49065" y="0" z="0.22943" yaw="3.14" point_cloud="true"/> -->
+  <!--front_lidar--> <!--FIXME: z of LiDAR might be wrong-->
+  <xacro:hokuyo_lidar name="urg_front" parent="base_link" topics_ns="urg_front" min_angle="-2.3562" max_angle="2.3562" >
+    <origin xyz="0.43 0.245 0.3155" rpy="3.1416 0 0.785398163" />
+  </xacro:hokuyo_lidar>
+  <!--back_lidar--> <!--FIXME: z of LiDAR might be wrong-->
+  <xacro:hokuyo_lidar name="urg_back" parent="base_link" topics_ns="urg_back" min_angle="-2.3562" max_angle="2.3562" >
+    <origin xyz="-0.43 -0.245 0.3155" rpy="3.1416 0 3.92699082" />
+  </xacro:hokuyo_lidar>
+  <!--IMU-->
+  <xacro:imu_sensor fix_link="base_link"/>
+  <static>0</static>
+  <ros2_control name="GazeboSystem" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+    
+    <joint name="front_left_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-10.0</param>
+        <param name="max">+10.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <param name="pid_p">10.0</param>
+      <param name="pid_i">0.01</param>
+      <param name="pid_d">0.0</param>
+    </joint>
+
+    <joint name="front_right_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-10.0</param>
+        <param name="max">+10.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <param name="pid_p">10.0</param>
+      <param name="pid_i">0.01</param>
+      <param name="pid_d">0.0</param>
+    </joint>
+
+    <joint name="rear_left_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-10.0</param>
+        <param name="max">+10.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <param name="pid_p">10.0</param>
+      <param name="pid_i">0.01</param>
+      <param name="pid_d">0.0</param>
+    </joint>
+
+    <joint name="rear_right_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-10.0</param>
+        <param name="max">+10.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <param name="pid_p">10.0</param>
+      <param name="pid_i">0.01</param>
+      <param name="pid_d">0.0</param>
+    </joint>
+
+  </ros2_control>
+</robot>

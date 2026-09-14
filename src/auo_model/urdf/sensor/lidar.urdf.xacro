@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Includes -->
+  <xacro:include filename="$(find auo_model)/urdf/sensor/lidar.gazebo.xacro" />
+
+  <xacro:macro name="hokuyo_lidar" params="name:=laser parent:=base_link topics_ns:='' min_angle:=-3.14159 max_angle:=3.14159 *origin">
+    <joint name="${name}_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${name}_link"/>
+      <xacro:insert_block name="origin"/>
+    </joint>
+
+    <link name="${name}_link">
+      <collision name='${name}_collision'>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://auo_model/meshes/sensor/hokuyo.dae"/>
+        </geometry>
+      </collision>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://auo_model/meshes/sensor/hokuyo.dae"/>
+        </geometry>
+      </visual>
+    </link>
+
+    <!-- LiDAR Gazebo Plugin -->
+    <xacro:gazebo_hokuyo_lidar name="${name}" reference_link="${name}_link" topics_ns="${topics_ns}" min_angle="${min_angle}" max_angle="${max_angle}" />
+  </xacro:macro>
+</robot>

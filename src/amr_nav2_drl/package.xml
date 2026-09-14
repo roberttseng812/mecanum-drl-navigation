@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>amr_nav2_drl</name>
+  <version>0.0.1</version>
+  <description>Nav2 integration for DRL controller: a Nav2 Controller plugin plus a Python inference bridge.</description>
+  <maintainer email="you@example.com">you</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>pluginlib</depend>
+  <depend>nav2_core</depend>
+  <depend>nav2_costmap_2d</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf2_geometry_msgs</depend>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>nav2_msgs</exec_depend>
+  <exec_depend>action_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>amr_rl</exec_depend>
+  <exec_depend>nav2_mppi_controller</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+    <nav2_core plugin="plugin.xml"/>
+  </export>
+</package>
