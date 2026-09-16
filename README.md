@@ -16,9 +16,7 @@ mecanum-drl-navigation/
 ├── amr_nav2_drl/   # Nav2 外掛、SAC 推論、導航設定與實驗紀錄
 ├── amr_rl/         # Gymnasium 環境、訓練／評估程式與特徵擷取器
 ├── auo_model/      # AMR150M URDF/Xacro、mesh 與感測器模型
-├── gazebo_sim/     # 場景、地圖與底盤控制
-├── image/          # 系統與硬體架構圖片
-└── README.md
+└──  gazebo_sim/     # 場景、地圖與底盤控制
 ```
 
 ## 硬體架構
@@ -140,4 +138,7 @@ ros2 launch amr_nav2_drl amr_nav2_navfn_mppi_sim.launch.py
 
 實驗三模擬行人從正面接近機器人的情境，觀察機器人在前往目標途中如何調整路徑並避開行人。展示重點為 SAC（DRL）控制器運用麥克納姆輪的側向移動能力進行避讓，以及與 DWB、MPPI 的避障反應差異。
 
-[▶ 觀看實驗三執行影片](image/Video%20Project.mp4)
+
+https://github.com/user-attachments/assets/7d12694a-6023-4fc9-8712-8a80e3865f14
+
+
