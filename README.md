@@ -16,19 +16,45 @@ mecanum-drl-navigation/
 ├── amr_nav2_drl/   # Nav2 外掛、SAC 推論、導航設定與實驗紀錄
 ├── amr_rl/         # Gymnasium 環境、訓練／評估程式與特徵擷取器
 ├── auo_model/      # AMR150M URDF/Xacro、mesh 與感測器模型
-├── gazebo_sim/     # 場景、地圖、底盤控制與鍵盤遙控
+├── gazebo_sim/     # 場景、地圖與底盤控制
+├── image/          # 系統與硬體架構圖片
 └── README.md
 ```
+
+## 硬體架構
+
+系統採用雙主機分工：車載工業電腦負責感測資料與底盤控制，外接筆電執行定位、Nav2 規劃及 SAC 推論，透過 `ros1_bridge` 交換 ROS 1 / ROS 2 訊息。
+
+<p align="center">
+  <img src="image/hardware-setup.png" alt="AMR150M 系統實體配置：導航筆電、車載工業電腦與 LiDAR" width="720">
+</p>
+
+*系統實體配置，取自論文圖 2.1。*
+
+| 硬體 | 功能與配置 |
+| --- | --- |
+| AMR150M 底盤 | 四輪麥克納姆輪驅動，可前後移動、側向平移及原地旋轉 |
+| 車載工業電腦 | Advantech EI-52，Ubuntu 20.04 / ROS Noetic，整合 LiDAR、里程計與 TF，並與底盤驅動模組通訊 |
+| 導航運算主機 | ASUS TUF Gaming F15 FX507ZM，Ubuntu 22.04 / ROS 2 Humble，執行雷射融合、定位、導航與 SAC 推論 |
+| 雙 LiDAR | 兩組 Orbbec MS500，配置於車體右前與左後，分別發布 `/urg_front/scan` 與 `/urg_back/scan` |
+
+LiDAR 與車載電腦透過 Ethernet 連線，車載電腦經 RS485 與底盤驅動模組通訊；導航筆電透過區域網路接收感測資料並回傳速度命令。
+
+<p align="center">
+  <img src="image/hardware-architecture.png" alt="雙 LiDAR、車載電腦、導航筆電與四組馬達驅動器的硬體架構" width="960">
+</p>
+
+*硬體通訊與控制架構，取自論文圖 2.2。*
 
 ## 系統架構
 
 前後 LiDAR 掃描經融合後發布為 `/scan`。NavFn 產生全域路徑，自訂的 `amr_nav2_drl::DrlController` 選取局部目標，SAC 推論節點再產生速度指令，由 Nav2 控制流程送至底盤。
 
-![AMR150M 麥克納姆輪機器人](image/1.png)
+![雙主機 ROS 1 / ROS 2 導航與離線訓練架構](image/1.png)
 
 Stage 3 的預設推論設定為 240 個雷射取樣點、4 幀歷史觀測、歷史間隔 3，以及 20 Hz 控制頻率。速度範圍為 `vx ∈ [-0.30, 0.47] m/s`、`|vy| ≤ 0.35 m/s`、`|wz| ≤ 0.80 rad/s`，詳見[推論參數](amr_nav2_drl/config/drl_inference_stage3.yaml)。模型的觀測、特徵擷取器及動作設定須與訓練時一致。
 
-## 執行環境與安裝
+## 執行環境
 
 論文中的導航主機使用 **Ubuntu 22.04 / ROS 2 Humble**。模擬程式使用 Gazebo Classic 的 `gazebo_ros` 介面，以下指令供該 Linux 環境使用。
 
@@ -41,47 +67,6 @@ Stage 3 的預設推論設定為 240 個雷射取樣點、4 幀歷史觀測、�
 
 目前未提供鎖定版本的 Python 相依清單。使用既有模型時，請沿用其訓練環境版本，避免模型載入或觀測格式不相容。
 
-### 建立 workspace
-
-先安裝 ROS 2 Humble 與 colcon、rosdep 等開發工具，再執行：
-
-```bash
-source /opt/ros/humble/setup.bash
-mkdir -p ~/sac_ws/src
-cd ~/sac_ws/src
-git clone https://github.com/roberttseng812/mecanum-drl-navigation.git
-cd ~/sac_ws
-```
-
-若儲存庫為私人，clone 時須使用具存取權限的 GitHub 帳號。
-
-### 安裝相依與編譯
-
-```bash
-sudo apt update
-sudo apt install ros-humble-navigation2 ros-humble-nav2-bringup \
-  ros-humble-gazebo-ros-pkgs ros-humble-gazebo-ros2-control \
-  ros-humble-ros2-control ros-humble-ros2-controllers \
-  ros-humble-xacro ros-humble-realsense2-description \
-  ros-humble-nav2-mppi-controller python3-pip
-
-python3 -m pip install numpy gymnasium torch stable-baselines3 tensorboard matplotlib
-rosdep update
-rosdep install --from-paths src --ignore-src -r -y
-```
-
-若 rosdep 尚未初始化，先執行一次 `sudo rosdep init`。部分執行期相依未完整列入 manifest，仍須確認上表中的套件已備妥。`ira_laser_tools` 需要相容的 ROS 2 實作，並提供 `laserscan_multi_merger` executable。
-
-`gazebo_sim/package.xml` 另宣告了本庫未附的 `hospital_robot_spawner`。若 rosdep 無法解析，請確認使用場景是否需要它並補齊，或在確認不使用後調整本機 manifest，再繼續安裝。
-
-```bash
-cd ~/sac_ws
-colcon build --symlink-install
-source install/setup.bash
-```
-
-每個新終端都要載入 `/opt/ros/humble/setup.bash` 與 `~/sac_ws/install/setup.bash`。
-
 ## 啟動前設定
 
 ### 選擇單一里程計來源
@@ -93,20 +78,6 @@ source install/setup.bash
 ### 動態人物
 
 [school_8f_square.world](gazebo_sim/worlds/school_8f_square.world) 與 [school_8F.world](gazebo_sim/worlds/school_8F.world) 的人物 actor 區塊目前有註解。動態場景需要啟用對應區塊，並備妥人物資源與 `libActorCollisionsPlugin.so`。場景中的外掛路徑是原開發電腦的絕對路徑，必須改成自己的實際位置；此外部外掛未包含在本庫。
-
-## Gazebo 模擬與鍵盤控制
-
-```bash
-ros2 launch gazebo_sim amr150m_gazebo_square_stage1.launch.py
-```
-
-另一個終端啟動鍵盤控制：
-
-```bash
-ros2 run gazebo_sim teleop_mecanum.py
-```
-
-此 launch 使用 `school_8f_square.world`。訓練與導航前請關閉鍵盤控制，避免多個節點同時送出底盤速度。
 
 ## 強化學習訓練
 
