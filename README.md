@@ -5,7 +5,7 @@
 
 本專案以 AMR150M 麥克納姆輪移動機器人為平台，使用 Soft Actor-Critic（SAC）學習局部避障策略，並整合 ROS 2 Nav2 的全域規劃流程。模型根據歷史 LiDAR 觀測與目標狀態，輸出前進、側向及旋轉速度，以處理室內靜態障礙與動態人物情境。
 
-儲存庫提供機器人模型、Gazebo 模擬環境、強化學習訓練程式，以及 SAC、DWB、MPPI 三種局部控制器的導航設定。**目前包含程式與模擬資源，未附訓練完成的模型權重、replay buffer、實驗結果、論文及使用手冊。**
+儲存庫提供機器人模型、Gazebo 模擬環境、強化學習訓練程式，以及 SAC、DWB、MPPI 三種局部控制器的導航設定。
 
 ## 專案結構
 
@@ -24,20 +24,7 @@ mecanum-drl-navigation/
 
 前後 LiDAR 掃描經融合後發布為 `/scan`。NavFn 產生全域路徑，自訂的 `amr_nav2_drl::DrlController` 選取局部目標，SAC 推論節點再產生速度指令，由 Nav2 控制流程送至底盤。
 
-```mermaid
-flowchart LR
-    L[前後 LiDAR] --> M[LaserScan merger]
-    M --> S["/scan"]
-    G[導航目標] --> P[NavFn 全域規劃]
-    P --> C[DRL Controller 外掛]
-    C --> T[drl/local_goal]
-    T --> N[SAC 推論節點]
-    S --> N
-    N --> V[drl/cmd_vel]
-    V --> C
-    C --> O[Nav2 速度輸出]
-    O --> B[麥克納姆輪底盤]
-```
+![AMR150M 麥克納姆輪機器人](image/1.png)
 
 Stage 3 的預設推論設定為 240 個雷射取樣點、4 幀歷史觀測、歷史間隔 3，以及 20 Hz 控制頻率。速度範圍為 `vx ∈ [-0.30, 0.47] m/s`、`|vy| ≤ 0.35 m/s`、`|wz| ≤ 0.80 rad/s`，詳見[推論參數](amr_nav2_drl/config/drl_inference_stage3.yaml)。模型的觀測、特徵擷取器及動作設定須與訓練時一致。
 
