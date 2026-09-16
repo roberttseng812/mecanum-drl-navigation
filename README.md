@@ -29,7 +29,6 @@ mecanum-drl-navigation/
   <img src="image/hardware-setup.png" alt="AMR150M 系統實體配置：導航筆電、車載工業電腦與 LiDAR" width="720">
 </p>
 
-*系統實體配置，取自論文圖 2.1。*
 
 | 硬體 | 功能與配置 |
 | --- | --- |
@@ -44,8 +43,6 @@ LiDAR 與車載電腦透過 Ethernet 連線，車載電腦經 RS485 與底盤驅
   <img src="image/hardware-architecture.png" alt="雙 LiDAR、車載電腦、導航筆電與四組馬達驅動器的硬體架構" width="960">
 </p>
 
-*硬體通訊與控制架構，取自論文圖 2.2。*
-
 ## 系統架構
 
 前後 LiDAR 掃描經融合後發布為 `/scan`。NavFn 產生全域路徑，自訂的 `amr_nav2_drl::DrlController` 選取局部目標，SAC 推論節點再產生速度指令，由 Nav2 控制流程送至底盤。
@@ -56,7 +53,7 @@ Stage 3 的預設推論設定為 240 個雷射取樣點、4 幀歷史觀測、�
 
 ## 執行環境
 
-論文中的導航主機使用 **Ubuntu 22.04 / ROS 2 Humble**。模擬程式使用 Gazebo Classic 的 `gazebo_ros` 介面，以下指令供該 Linux 環境使用。
+導航主機使用 **Ubuntu 22.04 / ROS 2 Humble**。模擬程式使用 Gazebo Classic 的 `gazebo_ros` 介面，以下指令供該 Linux 環境使用。
 
 | 類別 | 相依項目 |
 | --- | --- |
@@ -73,11 +70,11 @@ Stage 3 的預設推論設定為 240 個雷射取樣點、4 幀歷史觀測、�
 
 目前 [mecanum_controller.py](gazebo_sim/src/mecanum_controller.py) 會發布輪速里程計及 TF，而 [base_amr150m.gazebo.xacro](auo_model/urdf/base/base_amr150m.gazebo.xacro) 也啟用了 Gazebo P3D 里程計外掛。使用前需選定來源，避免 `/odom` 或里程計 TF 重複發布。
 
-使用手冊的訓練流程採 Gazebo 里程計：停用 `mecanum_controller.py` 中的里程計發布與對應 TF 發布，保留輪速控制，並確認 P3D 外掛啟用。若採輪速里程計，則停用 P3D 的重複輸出。更改後重新編譯並重啟模擬。
+訓練流程採 Gazebo 里程計：停用 `mecanum_controller.py` 中的里程計發布與對應 TF 發布，保留輪速控制，並確認 P3D 外掛啟用。若採輪速里程計，則停用 P3D 的重複輸出。更改後重新編譯並重啟模擬。
 
 ### 動態人物
 
-[school_8f_square.world](gazebo_sim/worlds/school_8f_square.world) 與 [school_8F.world](gazebo_sim/worlds/school_8F.world) 的人物 actor 區塊目前有註解。動態場景需要啟用對應區塊，並備妥人物資源與 `libActorCollisionsPlugin.so`。場景中的外掛路徑是原開發電腦的絕對路徑，必須改成自己的實際位置；此外部外掛未包含在本庫。
+[school_8f_square.world](gazebo_sim/worlds/school_8f_square.world) 的人物 actor 區塊目前有註解。動態場景需要啟用對應區塊，並備妥人物資源與 `libActorCollisionsPlugin.so`。場景中的外掛路徑是原開發電腦的絕對路徑，必須改成自己的實際位置；此外部外掛未包含在本庫。
 
 ## 強化學習訓練
 
@@ -86,29 +83,13 @@ Stage 3 的預設推論設定為 240 個雷射取樣點、4 幀歷史觀測、�
 以下以 Stage 3 為例。先完成里程計、動態人物與相依設定，再啟動模擬：
 
 ```bash
-ros2 launch gazebo_sim amr150m_gazebo_square_stage3.launch.py
+ros2 launch gazebo_sim amr150m_gazebo_square_stage3_1.launch.py
 ```
 
-另一個終端執行訓練，明確指定輸出目錄：
+另一個終端執行訓練：
 
 ```bash
-cd ~/sac_ws
-ros2 run amr_rl train_stage3 \
-  --total-steps 300000 \
-  --logdir runs_stage3 \
-  --modeldir models_stage3
-```
-
-續訓與訓練監測：
-
-```bash
-ros2 run amr_rl train_stage3 \
-  --load-model /absolute/path/to/checkpoint.zip \
-  --total-steps 300000 \
-  --logdir runs_stage3 \
-  --modeldir models_stage3
-
-tensorboard --logdir ~/sac_ws/runs_stage3
+ros2 run amr_rl train_stage3_1
 ```
 
 瀏覽器開啟 `http://localhost:6006/` 查看紀錄。完整參數可用 `ros2 run amr_rl train_stage3 --help` 查詢，包含模型載入、replay buffer、checkpoint 與環境設定。開始訓練前須確認 `/scan`、`/odom` 及 `/set_entity_state` 服務可用。
@@ -122,8 +103,7 @@ tensorboard --logdir ~/sac_ws/runs_stage3
 先準備與 Stage 3 推論設定相容的 SAC 模型，再指定其絕對路徑：
 
 ```bash
-ros2 launch amr_nav2_drl amr_nav2_drl_sim_stage3.launch.py \
-  model:=/absolute/path/to/sac_stage3.zip
+ros2 launch amr_nav2_drl amr_nav2_drl_sim_stage3.launch.py 
 ```
 
 ### DWB 與 MPPI 比較
@@ -144,38 +124,10 @@ ros2 launch amr_nav2_drl amr_nav2_navfn_mppi_sim.launch.py
 - [DWB](amr_nav2_drl/config/nav2_params_navfn_dwb.yaml)
 - [MPPI](amr_nav2_drl/config/nav2_params_navfn_mppi.yaml)
 
-## 實機與實驗紀錄
-
-論文中的 AMR150M 車載端使用 ROS Noetic，導航主機使用 ROS 2 Humble，透過 `ros1_bridge` 交換感測資料與速度命令。本庫未提供完整車載驅動及 bridge 部署環境。
-
-實機導航前，需先備妥底盤驅動、ROS bridge、雙 LiDAR、里程計、TF 與地圖，並完成兩台主機的時間同步。使用手冊採 Chrony 同步，網路位址須依實際設備設定。實機使用 `use_sim_time:=false`。
-
-```bash
-ros2 launch amr_nav2_drl amr_nav2_drl_stage3.launch.py \
-  model:=/absolute/path/to/sac_stage3.zip \
-  map:=/absolute/path/to/map.yaml \
-  use_sim_time:=false
-```
-
-若已由其他節點發布融合後的 `/scan`，可加上 `use_laser_merger:=false`。實機 DWB 與 MPPI 對應 `amr_nav2_navfn_dwb.launch.py`、`amr_nav2_navfn_mppi.launch.py`。
-
-導航系統就緒後，可用實驗節點指定目標並記錄資料。以下為模擬範例，目標座標須依地圖修改：
-
-```bash
-ros2 launch amr_nav2_drl nav2_experiment_runner.launch.py \
-  use_sim_time:=true controller_name:=DRL \
-  goal_x:=1.0 goal_y:=1.0 goal_yaw:=0.0 \
-  output_dir:=$HOME/sac_ws/amr_nav2_experiments
-```
-
-`controller_name` 是輸出紀錄的標籤，不會切換正在執行的控制器。CSV 依 `<output_dir>/<controller_name>/<route_index>/` 分類儲存。
 
 ## 已知限制
 
-- 本庫保留研究開發時的設定，執行前須處理外部相依、模型權重、場景外掛路徑與里程計來源。
-- 模型、Python 套件及推論參數的版本與格式必須相容，目前未提供完整鎖版環境。
-- 部分 package 描述、維護者及授權欄位仍是開發預設值，目前沒有儲存庫層級的 `LICENSE`。
-- 本 README 依論文、使用手冊與原始碼核對，尚未在 ROS 2 / Gazebo 環境重新驗證完整執行流程。
+
 
 ## 研究來源
 
